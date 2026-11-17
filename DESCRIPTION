@@ -1,0 +1,28 @@
+Package: pob2ef
+Title: Partially Optimized Bayesian Phase II Efficacy and Futility
+        Design
+Version: 0.1.0
+Authors@R: 
+    person(given = "Feinan",
+           family = "Lu",
+           email = "feinan.lu@hotmail.com",
+           role = c("aut", "cre"))
+Description: Implements a partially optimized Bayesian single-arm phase II
+    design for a binary efficacy endpoint with efficacy and futility stopping.
+    The design searches candidate response-count boundaries and, subject to
+    prespecified error constraints, selects the design that minimizes the
+    grey-zone at the final look. The package creates decision tables and
+    evaluates operating characteristics by exact trial-path enumeration or
+    Monte Carlo simulation.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Suggests: knitr, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
+NeedsCompilation: no
+Packaged: 2026-10-30 06:23:31 UTC; feinan.lu
+Author: Feinan Lu [aut, cre]
+Maintainer: Feinan Lu <feinan.lu@hotmail.com>
+Repository: CRAN
+Date/Publication: 2026-11-17 12:10:02 UTC

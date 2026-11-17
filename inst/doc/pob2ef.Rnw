@@ -1,0 +1,124 @@
+%\VignetteIndexEntry{Partially Optimized Bayesian Phase II Design}
+%\VignetteEngine{knitr::knitr}
+%\VignetteEncoding{UTF-8}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+
+\title{A Partially Optimized Bayesian Phase II Design}
+\author{pob2ef}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+
+The \texttt{pob2ef} package implements a Bayesian single-arm phase II design
+for a binary efficacy endpoint. The method distinguishes an unacceptable
+response-rate benchmark $p_0$ from a clinically desirable target $p_1$, where
+$p_1 > p_0$. It permits efficacy and futility stopping while intentionally
+retaining a final grey-zone result when the evidence is intermediate.
+
+<<setup, include=FALSE>>=
+knitr::opts_chunk$set(comment = NA)
+library(pob2ef)
+@
+
+\section{Posterior decision rules}
+
+At a planned analysis after $n$ evaluable participants, let $D_n$ denote the
+observed response data. The design declares futility when
+
+\[
+\Pr(\theta > p_0 \mid D_n) < C_F(n),
+\]
+
+and declares superiority when
+
+\[
+\Pr(\theta > p_1 \mid D_n) > C_E(n).
+\]
+
+The boundary family is
+
+\[
+C_F(n) = \lambda_1(n/N)^\gamma, \qquad
+C_E(n) = 1 - \lambda_2(n/N)^\eta,
+\]
+
+with tuning-parameter constraints
+
+\[
+0 < \lambda_1 \leq 0.5, \qquad
+0 < \lambda_2 < 0.5, \qquad
+\gamma, \eta \geq 0.
+\]
+
+If neither rule is met at an interim analysis, accrual continues. If neither
+rule is met at the final analysis, the outcome is a grey-zone result. The grey
+zone is an intentional evidence category; it is not silently reclassified as a
+futility conclusion.
+
+\section{Constrained partial optimization}
+
+Candidate boundary settings must satisfy the two prespecified error constraints
+
+\[
+\Pr_{p_0}(\mathrm{superiority}) \leq \alpha,
+\qquad
+\Pr_{p_1}(\mathrm{futility}) \leq \beta.
+\]
+
+Among feasible candidates, \texttt{pob2ef} first minimizes the final grey-zone
+probability at $p_1$, then uses expected sample size at $p_0$ as a tie-breaker.
+Thus, error control is mandatory and grey-zone minimization is the optimization
+objective among designs meeting those constraints.
+
+\section{Selecting a design}
+
+The following small grid illustrates the workflow. In practice, users should
+specify a grid appropriate for the planned sample size and analysis schedule.
+
+<<select-design>>=
+design <- select_design(
+  n_max = 20,
+  looks = c(10, 20),
+  p0 = 0.20,
+  p1 = 0.40,
+  alpha = 0.10,
+  beta = 0.20,
+  lambda1_grid = 0.50,
+  lambda2_grid = 0.20,
+  gamma_grid = 0,
+  eta_grid = 0
+)
+
+design$selected
+@
+
+\section{Decision table and operating characteristics}
+
+The response-count table gives the action for every possible cumulative number
+of responses at each look.
+
+<<decision-table>>=
+actions <- decision_table(design)
+actions[actions$sample_size == 20, c("responses", "action")]
+@
+
+Exact trial-path enumeration is used during design selection. Simulation can
+then be used to examine operating characteristics across additional scenarios.
+
+<<simulation>>=
+simulation <- simulate_design(
+  design,
+  true_rates = c(0.20, 0.30, 0.40),
+  n_sim = 500,
+  seed = 2026
+)
+
+simulation$results
+@
+
+\end{document}
